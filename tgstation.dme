@@ -14,14 +14,6 @@
 
 // BEGIN_INCLUDE
 #include "_maps\_basemap.dm"
-#include "_maps\map_files\PlanetStation\READ_ME.dm"
-#include "_maps\map_files\PlanetStation\_CARGO.dmm"
-#include "_maps\map_files\PlanetStation\_COMMAND.dmm"
-#include "_maps\map_files\PlanetStation\_ENGINEERING.dmm"
-#include "_maps\map_files\PlanetStation\_MEDBAY.dmm"
-#include "_maps\map_files\PlanetStation\_SCIENCE.dmm"
-#include "_maps\map_files\PlanetStation\_SECURITY.dmm"
-#include "_maps\map_files\PlanetStation\_SERVICE.dmm"
 #include "code\_compile_options.dm"
 #include "code\world.dm"
 #include "code\__DEFINES\__513_compatibility.dm"
