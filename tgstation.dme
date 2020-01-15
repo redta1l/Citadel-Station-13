@@ -14,6 +14,7 @@
 
 // BEGIN_INCLUDE
 #include "_maps\_basemap.dm"
+#include "_maps\map_files\PlanetStation\READ_ME.dm"
 #include "code\_compile_options.dm"
 #include "code\world.dm"
 #include "code\__DEFINES\__513_compatibility.dm"
@@ -2014,6 +2015,8 @@
 #include "code\modules\mapping\verify.dm"
 #include "code\modules\mapping\mapping_helpers\_mapping_helpers.dm"
 #include "code\modules\mapping\mapping_helpers\baseturf.dm"
+#include "code\modules\mapping\mapping_helpers\network_builder\_network_builder.dm"
+#include "code\modules\mapping\mapping_helpers\network_builder\atmos_pipes.dm"
 #include "code\modules\mapping\mapping_helpers\network_builder\power_cables.dm"
 #include "code\modules\mapping\space_management\multiz_helpers.dm"
 #include "code\modules\mapping\space_management\space_level.dm"
@@ -2021,7 +2024,6 @@
 #include "code\modules\mapping\space_management\space_transition.dm"
 #include "code\modules\mapping\space_management\traits.dm"
 #include "code\modules\mapping\space_management\zlevel_manager.dm"
-#include "code\modules\maps\planetstation\mapping_helpers.dm"
 #include "code\modules\maps\planetstation\turfs.dm"
 #include "code\modules\mining\abandoned_crates.dm"
 #include "code\modules\mining\aux_base.dm"

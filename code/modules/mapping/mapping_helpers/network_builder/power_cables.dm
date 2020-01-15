@@ -2,8 +2,9 @@
 #define KNOT_AUTO 1
 #define KNOT_FORCED 2
 
-/// Builds networks like power cables/atmos lines/etc. ONLY supports CARDINALS.
+/// Automatically links on init to power cables and other cable builder helpers. Only supports cardinals.
 /obj/effect/network_builder/power_cable
+	name = "power line autobuilder"
 	icon_state = "powerlinebuilder"
 
 	/// Whether or not we forcefully make a knot
@@ -12,40 +13,34 @@
 	/// cable color as from GLOB.cable_colors
 	var/cable_color = "red"
 
-
 	color = "ff0000"
 
-	/// what directions we know cables are in
-	var/list/cable_directions
+/obj/effect/network_builder/power_cable/check_duplicates()
+	return (locate(/obj/structure/cable) in loc) || (locate(/obj/effect/network_builder/power_cable) in loc)
 
-/obj/effect/network_builder/power_cable/Initialize(mapload)
-	. = ..()
-	if(!mapload)
-		return GLOB.Debug2? INITIALIZE_HINT_NORMAL : INITIALIZE_HINT_QDEL
-	if(locate(/obj/structure/cable) in loc)
-		stack_trace("WARNING: Power cable helpers should NOT be ontop of existing cables"!)
-		return INITIALIZE_HINT_QDEL
-	return INITIALIZE_HINT_LATELOAD
-
-/// How this works: On LateInitialize, detect all directions that this should be applicable to, and do what it needs to do, and then inform all network builders in said directions that it's been around since it won't be around afterwards.
-/obj/effect/network_builder/power_cable/LateInitialize()
-	if(locate(type) in src)
-		if(!custom_spawned)
-			stack_trace("WARNING: Duplicate helper of [type] detected at [COORD(src)]")
-		qdel(src)
-	scan_directions()
-	if(!custom_spawned)
-		qdel(src)
-
-/// Scans directions, sets cable_directions to have every direction that we can link to. If there's another power cable builder detected, make sure they know we're here by adding us to their cable directions list before we're deleted.
-/obj/effect/network_builder/power_cable/proc/scan_directions()
+/// Scans directions, sets network_directions to have every direction that we can link to. If there's another power cable builder detected, make sure they know we're here by adding us to their cable directions list before we're deleted.
+/obj/effect/network_builder/power_cable/scan_directions()
+	var/turf/T
 	for(var/i in GLOB.cardinal)
-		if(i in cable_directions)
+		if(i in network_directions)
 			continue				//we're already set, that means another builder set us.
+		T = get_step(loc, i)
+		if(!T)
+			continue
+		var/obj/effect/network_builder/power_cable/other = locate() in T
+		if(other)
+			network_directions += i
+			LAZYADD(other.network_directions, turn(i, 180))
+			continue
+		for(var/obj/structure/cable/C in T)
+			if(C.d1 == turn(i, 180) || C.d2 == turn(i, 180))
+				network_directions += i
+				continue
+	return network_directions
 
 /// Directions should only ever have cardinals.
-/obj/effect/network_builder/power_cable/proc/spawn_wires(list/directions)
-	if(!length(directions))mob
+/obj/effect/network_builder/power_cable/build_network(list/directions = network_directions)
+	if(!length(directions))
 		return
 	else if(length(directions) == 1)
 		var/knot = (knot == KNOT_FORCED) || ((knot == KNOT_AUTO) && should_auto_knot())
@@ -65,7 +60,8 @@
 					li = dirs + li
 				new /obj/structure/cable(loc, cable_color, directions[i], directions[li])
 				if(knot)
-					new /obj/structure/cable(loc, cable_color, NONE, directinos[i])
+					new /obj/structure/cable(loc, cable_color, NONE, directions[i])
+					knot = FALSE
 
 /obj/effect/network_builder/power_cable/proc/should_auto_knot()
 	return (locate(/obj/machinery/terminal) in loc)
