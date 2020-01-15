@@ -1,0 +1,6 @@
+{
+    "map_name": "Planet Station",
+    "map_path": "map_files/PlanetStation",
+    "map_file": ["PlanetStation_Z-1.dmm","PlanetStation_Z0.dmm"],
+	"traits": [{"Up": 1}, {"Down": -1}]
+}
