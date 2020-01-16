@@ -115,7 +115,6 @@
 "ck" = (/obj/machinery/atmospherics/components/unary/vent_pump/on/layer1,/turf/open/floor/plasteel/white,/area/medical/medbay/central)
 "cl" = (/obj/machinery/atmospherics/components/unary/vent_pump/on/layer1{icon_state = "vent_map_on"; dir = 1},/turf/open/floor/plasteel/white,/area/medical/medbay/central)
 "cm" = (/obj/machinery/atmospherics/components/unary/vent_pump/on/layer1{icon_state = "vent_map_on"; dir = 8},/turf/open/floor/plasteel/white,/area/medical/medbay/central)
-"cn" = (/turf/closed/wall,/area/maintenance/port/aft)
 "co" = (/obj/machinery/atmospherics/pipe/simple/supply/hidden/layer1{icon_state = "intact"; dir = 4},/turf/open/floor/plasteel/white,/area/medical/medbay/central)
 "cp" = (/obj/machinery/atmospherics/pipe/simple/supply/hidden/layer1,/turf/closed/wall,/area/medical/medbay/central)
 "cq" = (/obj/machinery/atmospherics/pipe/simple/supply/hidden/layer1,/turf/open/floor/plasteel/white,/area/medical/medbay/central)
@@ -250,12 +249,7 @@
 "eP" = (/obj/machinery/door/airlock/command{name = "Chief Medical Officer's Quarters"; req_access_txt = "40"},/obj/effect/turf_decal/tile/blue{dir = 4},/obj/effect/turf_decal/tile/blue{icon_state = "tile_corner"; dir = 1},/obj/effect/turf_decal/tile/blue{icon_state = "tile_corner"; dir = 8},/obj/effect/turf_decal/tile/blue,/turf/open/floor/plasteel,/area/crew_quarters/heads/cmo/private)
 "eQ" = (/obj/machinery/atmospherics/pipe/simple/scrubbers/hidden/layer3{icon_state = "intact"; dir = 8},/obj/machinery/door/firedoor,/obj/effect/turf_decal/stripes/line{dir = 8},/obj/effect/turf_decal/stripes/line{dir = 4},/turf/open/floor/plasteel,/area/medical/medbay/central)
 "eR" = (/obj/machinery/atmospherics/pipe/manifold4w/supply/hidden/layer1,/turf/open/floor/plasteel/white,/area/medical/medbay/central)
-"eS" = (/turf/open/floor/plating,/area/maintenance/port/aft)
-"eT" = (/turf/open/floor/plating{icon_state = "panelscorched"},/area/maintenance/port/aft)
-"eU" = (/turf/open/floor/plating{icon_state = "platingdmg3"},/area/maintenance/port/aft)
-"eV" = (/turf/open/floor/plating{icon_state = "platingdmg2"},/area/maintenance/port/aft)
-"eW" = (/turf/open/floor/plating{icon_state = "platingdmg1"},/area/maintenance/port/aft)
-"eX" = (/obj/machinery/atmospherics/pipe/simple/supply/hidden/layer1{icon_state = "intact"; dir = 6},/turf/open/floor/plating,/area/maintenance/port/aft)
+"eX" = (/turf/open/floor/plating{icon_state = "panelscorched"},/area/maintenance/department/medical)
 "eY" = (/obj/machinery/atmospherics/pipe/simple/scrubbers/hidden/layer3,/obj/machinery/power/apc/auto_name/east,/turf/open/floor/plasteel/white,/area/medical/medbay/central)
 "eZ" = (/obj/effect/turf_decal/tile/blue{dir = 4},/obj/effect/turf_decal/tile/blue{icon_state = "tile_corner"; dir = 8},/obj/machinery/power/apc/auto_name/north,/obj/machinery/light{dir = 1},/turf/open/floor/plasteel/cafeteria,/area/crew_quarters/heads/cmo)
 "fa" = (/obj/machinery/power/apc/auto_name/south,/turf/open/floor/carpet/royalblue,/area/crew_quarters/heads/cmo/private)
@@ -274,9 +268,9 @@
 "fn" = (/obj/machinery/atmospherics/pipe/simple/supply/hidden/layer1,/obj/machinery/firealarm{dir = 4; pixel_x = -24},/turf/open/floor/plasteel/white,/area/medical/medbay/central)
 "fo" = (/obj/effect/turf_decal/tile/red,/obj/effect/turf_decal/tile/red{dir = 8},/obj/machinery/firealarm{dir = 1; pixel_x = 0; pixel_y = -28},/turf/open/floor/plasteel,/area/security/checkpoint/medical)
 "fp" = (/obj/machinery/firealarm{dir = 4; pixel_x = -24},/turf/open/floor/plasteel,/area/medical/medbay/lobby)
-"fq" = (/obj/machinery/door/airlock/maintenance{name = "CMO Maintenance"; req_access_txt = "40"},/turf/open/floor/plating,/area/maintenance/port/aft)
+"fq" = (/turf/closed/wall,/area/maintenance/department/medical)
 "fr" = (/obj/effect/turf_decal/tile/blue{dir = 4},/obj/effect/turf_decal/tile/blue,/obj/machinery/firealarm{dir = 8; pixel_x = 24},/turf/open/floor/plasteel/white,/area/medical/medbay/lobby)
-"fs" = (/obj/machinery/door/airlock/maintenance{name = "Medbay Maintenance"; req_one_access_txt = "12;45;5;9"},/turf/open/floor/plating,/area/maintenance/port/aft)
+"fs" = (/turf/open/floor/plating,/area/maintenance/department/medical)
 "ft" = (/obj/structure/table/glass,/obj/effect/turf_decal/tile/blue{dir = 4},/obj/effect/turf_decal/tile/blue{icon_state = "tile_corner"; dir = 8},/obj/machinery/computer/med_data/laptop{dir = 8; pixel_y = 1},/turf/open/floor/plasteel/cafeteria,/area/crew_quarters/heads/cmo)
 "fu" = (/obj/structure/table/glass,/obj/effect/turf_decal/tile/blue{dir = 4},/obj/effect/turf_decal/tile/blue{icon_state = "tile_corner"; dir = 8},/obj/item/folder/blue,/obj/item/folder/white{pixel_x = 4; pixel_y = 5},/obj/item/pen,/turf/open/floor/plasteel/cafeteria,/area/crew_quarters/heads/cmo)
 "fv" = (/obj/machinery/atmospherics/pipe/simple/scrubbers/hidden/layer3{icon_state = "intact"; dir = 6},/obj/machinery/atmospherics/pipe/simple/supply/hidden/layer1{icon_state = "intact"; dir = 5},/turf/open/floor/carpet/cyan,/area/crew_quarters/heads/cmo/private)
@@ -345,7 +339,7 @@
 "gG" = (/obj/machinery/door/firedoor,/obj/effect/turf_decal/stripes/line,/obj/effect/turf_decal/stripes/line{dir = 1},/turf/open/floor/plasteel,/area/medical/medbay/central)
 "gH" = (/obj/machinery/atmospherics/pipe/simple/supply/hidden/layer1,/obj/structure/sign/nanotrasen{pixel_x = -32},/obj/machinery/door/firedoor,/obj/effect/turf_decal/stripes/line,/obj/effect/turf_decal/stripes/line{dir = 1},/turf/open/floor/plasteel,/area/medical/medbay/central)
 "gI" = (/obj/effect/turf_decal/tile/neutral,/obj/effect/turf_decal/tile/neutral{dir = 4},/obj/effect/turf_decal/tile/neutral{dir = 1},/obj/effect/turf_decal/tile/neutral{dir = 8},/obj/structure/window/reinforced{dir = 4; layer = 2.9},/turf/open/floor/plasteel/dark,/area/medical/genetics/cloning)
-"gJ" = (/turf/closed/wall/r_wall,/area/maintenance/port/aft)
+"gJ" = (/obj/machinery/door/airlock/maintenance{name = "CMO Maintenance"; req_access_txt = "40"},/turf/open/floor/plating,/area/maintenance/department/medical)
 "gK" = (/obj/structure/sign/departments/medbay/alt,/turf/closed/wall,/area/medical/medbay/central)
 "gL" = (/obj/structure/sign/departments/medbay/alt,/turf/closed/wall,/area/medical/medbay/lobby)
 "gM" = (/obj/structure/chair,/obj/effect/landmark/start/assistant,/turf/open/floor/plasteel/white,/area/medical/medbay/lobby)
@@ -396,38 +390,43 @@
 "hF" = (/obj/structure/table/glass,/obj/item/storage/box/gloves,/turf/open/floor/plasteel/white,/area/medical/genetics)
 "hG" = (/turf/closed/wall/r_wall,/area/medical/genetics/cloning)
 "hH" = (/obj/effect/turf_decal/tile/red,/obj/effect/turf_decal/tile/red{dir = 8},/obj/effect/turf_decal/tile/red{dir = 4},/obj/structure/table/reinforced,/turf/open/floor/plasteel,/area/security/checkpoint/medical)
+"hI" = (/obj/machinery/door/airlock/maintenance{name = "Medbay Maintenance"; req_one_access_txt = "12;45;5;9"},/turf/open/floor/plating,/area/maintenance/department/medical)
+"hJ" = (/turf/open/floor/plating{icon_state = "platingdmg3"},/area/maintenance/department/medical)
+"hK" = (/turf/open/floor/plating{icon_state = "platingdmg2"},/area/maintenance/department/medical)
+"hL" = (/turf/open/floor/plating{icon_state = "platingdmg1"},/area/maintenance/department/medical)
+"hM" = (/obj/machinery/atmospherics/pipe/simple/supply/hidden/layer1{icon_state = "intact"; dir = 6},/turf/open/floor/plating,/area/maintenance/department/medical)
 
 (1,1,1) = {"
 abababababababababababababababababababababababababababababababababababababababababababababababababab
 abababababababababababababababababababababababababababababababababababababababababababababababababab
 abababababababababababababababababababababababababababababababababababababababababababababababababab
-aaaaaaaacncneScncncncncncncncncncncneSbQbQbQbQbQbQbQbQbQbQbQbQbQbQcneScnaaaaaaaaaaaaaaaaaaaaaaababab
-aaaaaaaacncneScneSeTeSeSeSeSeSeSeUcneSbQadafafafafafafafafafadadbQeSeScnaaaaaaaaaaaaaaaaaaaaaaababab
-aaaaaaaacneSeScneSeSeSeVeSeSeSeSeSeSeSbQadafafafafafafafafafadadbQeSeUcnaaaaaaaaaaaaaaaaaaaaaaababab
-aaaaaaaacneSeSeSeWeSeSeSeSeSeSeSeScneSeSadafafafafafafafafafadadeSeSeScnaaaaaaaaaaaaaaaaaaaaaaababab
-aaaaaaaacneTeScncncncncncncncncncncneSbQadafafafafafafafafafadadbQeTeScnaaaaaaaaaaaaaaaaaaaaaaababab
-aaaaaaaacneSeSeSeSeSeSeSeSeSeSeSeSeSeSbQadafafafafafafafafadadadbQeSeScnalalalalalalalalalalalababab
-aaaaaaaacneSeSdFdFdFdFdFdFdFdFdFdFdFeTbRbRbRbSbSbSbSbSbRbRagagagbQcneSeSbHbHbHewbHbHbHbHewbHbHababab
-aaaaaaaacneSeSdFfSgRgPhcbChwgSgQfTdFeSbRdMepepepepepepesbRdmdLbPbQeSeSeValalalalalalalalalalalababab
-aaaaaaaacneSeSdFgOhAhBggghhuhvhyhCdFeSeSdnbTbTbTgXgYgVfhbRdmdLbPbQeSeWeSalaRaRaRaRaRaRaRaRaRbFababab
-aaaaaaaacneTeSdFgUhcgngnhpgngnhwhFdFeSbRdVgWhahbgZbTbTeqbRdmdLbPbQcncneSeSaRaRaRaRaRaRaRaRaRbIababab
-aaaaaaaacneSeSdFhDhcgngnhpgngnhwhEdFeSbRetfoemeneoererhHbRdmdLbPbQeScnalalaRaRaRaRaRaRaRaRaRbFababab
-aaaaaaaacneSeSeShBgggfgpgqbLbLglhzeSeSbReubRbSdNdobSbSbRbRdmdLbPbQalalalaRaRaRaRaRaRaRaRaRaRalababab
-aaaaaaaacneSeSdFhehfhghhgrhshththxdFeSeXcococobydpcocococidpczctcvbGdPaRaRaRaRaRaRaRaRaRaRaRbFababab
-aaaaaaaacneSeShGhGhGhGhGgDhGajajajhGbJcpatatchatcOatatatdicOclcqateFaRaRaRaRaRaRaRaRaRaRaRaRbFababab
-aaaaaaaacneSeSacfJgvgsgwgxgzhrgAhdacbJhiatdebMdfcAdfdffdeQcAdfcYdfayaCaRaRaRaRaRaRaRaRaRaRaRalababab
-aaaaaaaacneSeSacgthjandIfmdIdIdIaoapdJdKdJddaPaQaQaPaPaPaQaQaPavflalalalbFbFbFbFalbFbIbFalalalababab
-aaaaaaaacneSeSacgyhogjgjgkgjgogjhkeDatcqfPcPaQbabbbXbbbcbbbdaQcuatcrbJamaqaqaqgMarasasasawaxgLababab
-aaaaaaaacneSeSacgIhlbNhmgihngmgBhqbUdOeRcvcQbecwcxbYbibhbjbkbgdgdfbxaMcMcNdqdrcNcNcNcNdBcNdsdtababab
-aaaaaaaacneSaiaiaiaiaibKbKbKbKbKbKbKevcqatcRblbmbnbobpbZcTcUbwdhcvbfcccFcGgbcCcGcGcGcfdvcGcHcIababab
-aaaaaaaacneSaiexeyezaififLftdGeZfNfNbKcBcmcSaQbqbrbsbtbWbubvaQcXatbzgKaDaEaEaEaFaAaAdwdxaAaBahababab
-aaaaaaaacneSaieAfxeKeLgueEfufyaOeJeBdHdlateYaPaPaPaPcaaPaQaQaPgEgFgGbJaGaHaIaIazaAaZcLaAaAaxakababab
-aaaaaaaacneSaieMfvfBfDfKfEfFfIfGfHaOgCcqatcObAcydYeecbdSdTehbAavatatbJelaJeiejazaAcgfUaAaAaLakababab
-aaaaaaaacneSaieNfAeKaifOaOdCfCfCfCeCdDdEdfddcWefbOfRfQcVdRdXdUcZcvcvcJcKcdaJekgcaAfVfWceaAaLakababab
-aaaaaaaacneSgJfweOfaePaOaOfzfbfMfjeHbKfnatdjdWdZegcbcbcbcbcbeaavfPfebJffaJaJaKazaAfVfXaAgdaLakababab
-aaaaaaaacneSaiaiaiaiaibKfqbKbKbKbKbKbKgHgGgTbAdQdQebcbecdQdQbAavatatbJfpaJeiejazaAfYfZaAaAaLakababab
-aaaaaaaacneSeSeSeSeSeSeSeSeSeSeSeSeSfscqcjddbVbAbAbVedbVbAbAbVavatflbJaNaSaTaUazaAaqgaaAaAaxakababab
-aaaaaaaacncncncncncncncncncncncncncnbJcqatcOatatatatatatatatatavataugKaVaWaWaWaXaAdydzaAaAfrahababab
+aaaaaaaafqfqfsfqfqfqfqfqfqfqfqfqfqfqfsbQbQbQbQbQbQbQbQbQbQbQbQbQbQfqfsfqaaaaaaaaaaaaaaaaaaaaaaababab
+aaaaaaaafqfqfsfqfseXfsfsfsfsfsfshJfqfsbQadafafafafafafafafafadadbQfsfsfqaaaaaaaaaaaaaaaaaaaaaaababab
+aaaaaaaafqfsfsfqfsfsfshKfsfsfsfsfsfsfsbQadafafafafafafafafafadadbQfshJfqaaaaaaaaaaaaaaaaaaaaaaababab
+aaaaaaaafqfsfsfshLfsfsfsfsfsfsfsfsfqfsfsadafafafafafafafafafadadfsfsfsfqaaaaaaaaaaaaaaaaaaaaaaababab
+aaaaaaaafqeXfsfqfqfqfqfqfqfqfqfqfqfqfsbQadafafafafafafafafafadadbQeXfsfqaaaaaaaaaaaaaaaaaaaaaaababab
+aaaaaaaafqfsfsfsfsfsfsfsfsfsfsfsfsfsfsbQadafafafafafafafafadadadbQfsfsfqalalalalalalalalalalalababab
+aaaaaaaafqfsfsdFdFdFdFdFdFdFdFdFdFdFeXbRbRbRbSbSbSbSbSbRbRagagagbQfqfsfsbHbHbHewbHbHbHbHewbHbHababab
+aaaaaaaafqfsfsdFfSgRgPhcbChwgSgQfTdFfsbRdMepepepepepepesbRdmdLbPbQfsfshKalalalalalalalalalalalababab
+aaaaaaaafqfsfsdFgOhAhBggghhuhvhyhCdFfsfsdnbTbTbTgXgYgVfhbRdmdLbPbQfshLfsalaRaRaRaRaRaRaRaRaRbFababab
+aaaaaaaafqeXfsdFgUhcgngnhpgngnhwhFdFfsbRdVgWhahbgZbTbTeqbRdmdLbPbQfqfqfsfsaRaRaRaRaRaRaRaRaRbIababab
+aaaaaaaafqfsfsdFhDhcgngnhpgngnhwhEdFfsbRetfoemeneoererhHbRdmdLbPbQfsfqalalaRaRaRaRaRaRaRaRaRbFababab
+aaaaaaaafqfsfsfshBgggfgpgqbLbLglhzfsfsbReubRbSdNdobSbSbRbRdmdLbPbQalalalaRaRaRaRaRaRaRaRaRaRalababab
+aaaaaaaafqfsfsdFhehfhghhgrhshththxdFfshMcococobydpcocococidpczctcvbGdPaRaRaRaRaRaRaRaRaRaRaRbFababab
+aaaaaaaafqfsfshGhGhGhGhGgDhGajajajhGbJcpatatchatcOatatatdicOclcqateFaRaRaRaRaRaRaRaRaRaRaRaRbFababab
+aaaaaaaafqfsfsacfJgvgsgwgxgzhrgAhdacbJhiatdebMdfcAdfdffdeQcAdfcYdfayaCaRaRaRaRaRaRaRaRaRaRaRalababab
+aaaaaaaafqfsfsacgthjandIfmdIdIdIaoapdJdKdJddaPaQaQaPaPaPaQaQaPavflalalalbFbFbFbFalbFbIbFalalalababab
+aaaaaaaafqfsfsacgyhogjgjgkgjgogjhkeDatcqfPcPaQbabbbXbbbcbbbdaQcuatcrbJamaqaqaqgMarasasasawaxgLababab
+aaaaaaaafqfsfsacgIhlbNhmgihngmgBhqbUdOeRcvcQbecwcxbYbibhbjbkbgdgdfbxaMcMcNdqdrcNcNcNcNdBcNdsdtababab
+aaaaaaaafqfsaiaiaiaiaibKbKbKbKbKbKbKevcqatcRblbmbnbobpbZcTcUbwdhcvbfcccFcGgbcCcGcGcGcfdvcGcHcIababab
+aaaaaaaafqfsaiexeyezaififLftdGeZfNfNbKcBcmcSaQbqbrbsbtbWbubvaQcXatbzgKaDaEaEaEaFaAaAdwdxaAaBahababab
+aaaaaaaafqfsaieAfxeKeLgueEfufyaOeJeBdHdlateYaPaPaPaPcaaPaQaQaPgEgFgGbJaGaHaIaIazaAaZcLaAaAaxakababab
+aaaaaaaafqfsaieMfvfBfDfKfEfFfIfGfHaOgCcqatcObAcydYeecbdSdTehbAavatatbJelaJeiejazaAcgfUaAaAaLakababab
+aaaaaaaafqfsaieNfAeKaifOaOdCfCfCfCeCdDdEdfddcWefbOfRfQcVdRdXdUcZcvcvcJcKcdaJekgcaAfVfWceaAaLakababab
+aaaaaaaafqfsaifweOfaePaOaOfzfbfMfjeHbKfnatdjdWdZegcbcbcbcbcbeaavfPfebJffaJaJaKazaAfVfXaAgdaLakababab
+aaaaaaaafqfsaiaiaiaiaibKgJbKbKbKbKbKbKgHgGgTbAdQdQebcbecdQdQbAavatatbJfpaJeiejazaAfYfZaAaAaLakababab
+aaaaaaaafqfsfsfsfsfsfsfsfsfsfsfsfsfshIcqcjddbVbAbAbVedbVbAbAbVavatflbJaNaSaTaUazaAaqgaaAaAaxakababab
+aaaaaaaafqfqfqfqfqfqfqfqfqfqfqfqfqfqbJcqatcOatatatatatatatatatavataugKaVaWaWaWaXaAdydzaAaAfrahababab
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabJcqatcOatatatfPatatatckatdacvbfcccFcGcGcDgbcGdvcEcGcGcHcIababab
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabJgecvcsdbfkdbdbfcdbdbdcdbdkdfbxaMcMcNdqducNcNdAcNcNcNdsdtababab
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabJbJbJbJbJbJbJbJbJbJbJbJbJeGatbzbJaYaZgNaZaZbBfgeIbDbEaxgLababab

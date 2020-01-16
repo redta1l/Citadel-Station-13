@@ -1,0 +1,26 @@
+"a" = (/turf/template_noop,/area/template_noop)
+"b" = (/turf/closed/wall/mineral/titanium,/area/shuttle/supply)
+"c" = (/obj/structure/shuttle/engine/propulsion/left{dir = 8},/obj/effect/turf_decal/stripes/line{dir = 8},/turf/open/floor/plating,/area/shuttle/supply)
+"d" = (/turf/open/floor/mineral/titanium/blue,/area/shuttle/supply)
+"e" = (/obj/effect/turf_decal/stripes/line{dir = 8},/turf/open/floor/plating,/area/shuttle/supply)
+"f" = (/turf/open/floor/plating,/area/shuttle/supply)
+"g" = (/obj/structure/shuttle/engine/heater{dir = 8},/obj/structure/window/reinforced{dir = 4; layer = 2.9},/obj/effect/turf_decal/stripes/line{dir = 8},/turf/open/floor/plating,/area/shuttle/supply)
+"h" = (/obj/structure/shuttle/engine/large{icon_state = "large_engine"; dir = 8},/obj/effect/turf_decal/stripes/line{dir = 8},/turf/open/floor/plating,/area/shuttle/supply)
+"i" = (/obj/structure/shuttle/engine/propulsion/right{dir = 8},/obj/effect/turf_decal/stripes/line{dir = 8},/turf/open/floor/plating,/area/shuttle/supply)
+"j" = (/obj/machinery/light{dir = 1},/turf/open/floor/mineral/titanium/blue,/area/shuttle/supply)
+"k" = (/obj/machinery/light,/turf/open/floor/mineral/titanium/blue,/area/shuttle/supply)
+"l" = (/obj/machinery/button/door{id = "cargoload"; name = "Loading Doors"; pixel_x = 0; pixel_y = -24},/turf/open/floor/mineral/titanium/blue,/area/shuttle/supply)
+"m" = (/obj/machinery/button/door{dir = 2; id = "cargounload"; name = "Loading Doors"; pixel_x = 0; pixel_y = -24},/turf/open/floor/mineral/titanium/blue,/area/shuttle/supply)
+"n" = (/obj/machinery/conveyor{dir = 1; id = "cargoload"},/obj/machinery/door/poddoor{id = "cargounload"; name = "supply dock unloading door"},/turf/open/floor/plating,/area/shuttle/supply)
+"o" = (/obj/machinery/door/airlock/shuttle{name = "Supply Shuttle Airlock"; req_access_txt = "31"},/turf/open/floor/mineral/titanium/blue,/area/shuttle/supply)
+"p" = (/obj/machinery/door/poddoor{id = "cargoload"; name = "supply dock loading door"},/obj/machinery/conveyor{dir = 2; id = "cargounload"},/turf/open/floor/plating,/area/shuttle/supply)
+"q" = (/obj/machinery/door/airlock/shuttle{name = "Supply Shuttle Airlock"; req_access_txt = "31"},/obj/docking_port/mobile/supply{icon_state = "pinonclose"; dir = 1},/turf/open/floor/mineral/titanium/blue,/area/shuttle/supply)
+
+(1,1,1) = {"
+abbbbbbbbbbbb
+cbbbjddddddjb
+efgdddddddddb
+hfgdddddddddb
+ibbbkddlmddkb
+abbbbnqbbopbb
+"}
