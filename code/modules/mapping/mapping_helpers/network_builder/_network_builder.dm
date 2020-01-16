@@ -34,5 +34,5 @@
 /obj/effect/network_builder/proc/scan_directions()
 	CRASH("Base abstract network builder tried to scan directions.")
 
-/obj/effect/network_builder
+/obj/effect/network_builder/proc/build_network()
 	CRASH("Base abstract network builder tried to build network.")

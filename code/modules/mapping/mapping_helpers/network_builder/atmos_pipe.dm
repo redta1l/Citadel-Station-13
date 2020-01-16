@@ -2,7 +2,9 @@
 #define KNOT_AUTO 1
 #define KNOT_FORCED 2
 
-/// Automatically places pipes on init based on any pipes connecting to it and adjacent helpers. Only supports cardinals.
+/* Automatically places pipes on init based on any pipes connecting to it and adjacent helpers. Only supports cardinals.
+ * Conflicts with ANY PIPE ON ITS LAYER, as well as atmos network build helpers on the same layer, as well as any pipe on all layers. Do those manually.
+*/
 /obj/effect/network_builder/atmos_pipe
 	name = "atmos pipe autobuilder"
 	icon_state = "atmospipebuilder"
@@ -16,44 +18,18 @@
 	/// Whether or not pipes we make are visible
 	var/visible_pipes = FALSE
 
-	/// set var to true to not del on lateload
-	var/custom_spawned = FALSE
-
 	color = null
 
-	/// what directions we know pipes are in
-	var/list/pipe_directions
-
-/obj/effect/network_builder/atmos_pipe/Initialize(mapload)
-	. = ..()
-	if(!mapload)
-		if(GLOB.Debug2)
-			custom_spawned = TRUE
-			return INITIALIZE_HINT_NORMAL
-		else
-			return INITIALIZE_HINT_QDEL
-	if(locate(/obj/structure/cable) in loc)
-		stack_trace("WARNING: Power cable helpers should NOT be ontop of existing cables"!)
-		return INITIALIZE_HINT_QDEL
-	return INITIALIZE_HINT_LATELOAD
-
-/// How this works: On LateInitialize, detect all directions that this should be applicable to, and do what it needs to do, and then inform all network builders in said directions that it's been around since it won't be around afterwards.
-/obj/effect/network_builder/atmos_pipe/LateInitialize()
-	if(locate(type) in src)
-		if(!custom_spawned)
-			stack_trace("WARNING: Duplicate helper of [type] detected at [COORD(src)]")
-		qdel(src)
-	scan_directions()
-	if(!custom_spawned)
-		qdel(src)
 /obj/effect/network_builder/atmos_pipe/check_duplicates()
-	var/obj/effect/network_builder/atmos_pipe/other = locate() in loc
-	if(other)
-		return other
+	for(var/obj/effect/network_builder/atmos_pipe/other in loc)
+		if(other.pipe_layer == pipe_layer)
+			return other
 	for(var/obj/machinery/atmospherics/A in loc)
 		if(A.pipe_flags & PIPING_ALL_LAYER)
-			if(
-		return
+			return A
+		if(A.pipe_layer == pipe_layer)
+			return A
+	return FALSE
 
 /// Scans directions, sets network_directions to have every direction that we can link to. If there's another power cable builder detected, make sure they know we're here by adding us to their cable directions list before we're deleted.
 /obj/effect/network_builder/atmos_pipe/scan_directions()
@@ -64,21 +40,83 @@
 		T = get_step(loc, i)
 		if(!T)
 			continue
-		var/obj/effect/network_builder/atmos_pipe/other = locate() in T
-		if(other)
-			network_directions += i
-			LAZYADD(other.network_directions, turn(i, 180))
-			continue
-		for(var/obj/structure/cable/C in T)
-			if(C.d1 == turn(i, 180) || C.d2 == turn(i, 180))
+		var/found = FALSE
+		for(var/obj/effect/network_builder/atmos_pipe/other in T)
+			if(other.pipe_layer == pipe_layer)
 				network_directions += i
-				continue
+				LAZYADD(other.network_directions, turn(i, 180))
+				found = TRUE
+				break
+		if(found)
+			continue
+		for(var/obj/machinery/atmospherics/A in T)
+			if((A.pipe_layer == pipe_layer) && (A.initialize_directions & i))
+				network_directions += i
+				break
 	return network_directions
 
 /// Directions should only ever have cardinals.
 /obj/effect/network_builder/atmos_pipe/build_network(list/directions = pipe_directions)
 	if(!length(directions) <= 1)
 		return
+	var/obj/machinery/atmospherics/pipe/built
+	switch(length(directions))
+		if(2)		//straight pipe
+			built = new /obj/machinery/atmospherics/simple(loc)
+			built.setDir(directions[1] | directions[2])
+		if(3)		//manifold
+			var/list/missing = directions ^ GLOB.cardinal
+			missing = missing[1]
+			built = new /obj/machinery/atmospherics/pipe/manifold(loc)
+			built.setDir(missing)
+		if(4)		//4 way manifold
+			built = new /obj/machinery/atmospherics/pipe/manifold4w(loc)
+		built.SetInitDirections()
+		built.on_construction(pipe_color, piping_layer)
+
+/obj/item/pipe/wrench_act(mob/living/user, obj/item/wrench/W)
+	if(!isturf(loc))
+		return TRUE
+
+	add_fingerprint(user)
+
+	var/obj/machinery/atmospherics/fakeA = pipe_type
+	var/flags = initial(fakeA.pipe_flags)
+	for(var/obj/machinery/atmospherics/M in loc)
+		if((M.pipe_flags & flags & PIPING_ONE_PER_TURF))	//Only one dense/requires density object per tile, eg connectors/cryo/heater/coolers.
+			to_chat(user, "<span class='warning'>Something is hogging the tile!</span>")
+			return TRUE
+		if((M.piping_layer != piping_layer) && !((M.pipe_flags | flags) & PIPING_ALL_LAYER)) //don't continue if either pipe goes across all layers
+			continue
+		if(M.GetInitDirections() & SSair.get_init_dirs(pipe_type, fixed_dir()))	// matches at least one direction on either type of pipe
+			to_chat(user, "<span class='warning'>There is already a pipe at that location!</span>")
+			return TRUE
+	// no conflicts found
+
+	var/obj/machinery/atmospherics/A = new pipe_type(loc)
+	build_pipe(A)
+	A.on_construction(color, piping_layer)
+	transfer_fingerprints_to(A)
+
+	W.play_tool_sound(src)
+	user.visible_message( \
+		"[user] fastens \the [src].", \
+		"<span class='notice'>You fasten \the [src].</span>", \
+		"<span class='italics'>You hear ratcheting.</span>")
+
+	qdel(src)
+
+/obj/item/pipe/proc/build_pipe(obj/machinery/atmospherics/A)
+	A.setDir(fixed_dir())
+	A.SetInitDirections()
+
+	if(pipename)
+		A.name = pipename
+	if(A.on)
+		// Certain pre-mapped subtypes are on by default, we want to preserve
+		// every other aspect of these subtypes (name, pre-set filters, etc.)
+		// but they shouldn't turn on automatically when wrenched.
+		A.on = FALSE
 
 /obj/effect/network_builder/atmos_pipe/proc/spawn_wires(list/directions)
 	if(!length(directions))
