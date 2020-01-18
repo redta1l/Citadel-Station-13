@@ -4,6 +4,7 @@
 /obj/effect/mapping_helpers/network_builder/atmos_pipe
 	name = "atmos pipe autobuilder"
 	icon_state = "atmospipebuilder"
+	layer = GAS_PIPE_HIDDEN_LAYER
 
 	/// Layer to put our pipes on
 	var/pipe_layer = PIPING_LAYER_DEFAULT
@@ -84,8 +85,8 @@
 	pipe_layer = PIPING_LAYER_MIN
 	pixel_x = -PIPING_LAYER_P_X
 	pixel_y = -PIPING_LAYER_P_Y
-	pipe_color = rgb(130,43,255)
-	color = rgb(130,43,255)
+	pipe_color = rgb(0,0,255) //why was this purple?
+	color = rgb(0,0,255)
 
 /obj/effect/mapping_helpers/network_builder/atmos_pipe/scrubbers
 	name = "scrubbers line autobuilder"

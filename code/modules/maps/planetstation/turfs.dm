@@ -1,4 +1,4 @@
-/turf/open/floor/planetstation_topsoil
+/turf/open/floor/planetstation_topsoil //note: move this to ../plating/planetstation_grass
 	gender = PLURAL
 	name = "dirt"
 	desc = "Upon closer examination, it's still dirt. Looks very packed, it'd be very hard to break through this."

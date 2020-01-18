@@ -6,6 +6,7 @@
 /obj/effect/mapping_helpers/network_builder/power_cable
 	name = "power line autobuilder"
 	icon_state = "powerlinebuilder"
+	layer = WIRE_LAYER
 
 	color = "#ff0000"
 
