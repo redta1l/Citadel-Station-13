@@ -9,17 +9,27 @@
 
 /datum/uplink_item/suits/turtlenck
 	name = "Tactical Turtleneck"
-	desc = "A slightly armored suit that has no sensor on them, if someone sees you in this hope they think its a fake."
+	desc = "A slightly armored conspicious jumpsuit that has no suit sensors attached to them, if someone sees you in this hope they think its a fake."
 	item = /obj/item/clothing/under/syndicate
 	cost = 1
 	exclude_modes = list(/datum/game_mode/nuclear, /datum/game_mode/nuclear/clown_ops) //They already get these
 
 /datum/uplink_item/suits/turtlenck_skirt
 	name = "Tactical Skirtleneck"
-	desc = "A slightly armored suit that has no sensor on them, if someone sees you in this hope they think its a fake."
+	desc = "A slightly armored conspicious jumpsuit that has no suit sensors attached to them, if someone sees you in this hope they think its a fake."
 	item = /obj/item/clothing/under/syndicate/skirt
 	cost = 1
 	exclude_modes = list(/datum/game_mode/nuclear, /datum/game_mode/nuclear/clown_ops) //They already get these
+
+/datum/uplink_item/suits/infiltrator_bundle
+	name = "Insidious Infiltration Gear Case"
+	desc = "Developed by Roseus Galactic in conjunction with the Gorlex Marauders to produce a functional suit for urban operations, \
+			this suit proves to be cheaper than your standard issue hardsuit, with none of the movement restrictions (or the space proofing) of the outdated spacesuits employed by the company. \
+			Comes with an armored vest, helmet, blood-red sneaksuit, sneakboots, specialized combat gloves and a high-tech balaclava which obfuscates both your voice and your face. The case is also rather useful as a storage container and bludgeoning implement."
+	item = /obj/item/storage/toolbox/infiltrator
+	cost = 3
+	limited_stock = 1 //you only get one so you don't end up with too many gun cases
+	exclude_modes = list(/datum/game_mode/nuclear, /datum/game_mode/nuclear/clown_ops)
 
 /datum/uplink_item/suits/padding
 	name = "Soft Padding"
@@ -59,7 +69,7 @@
 			Nanotrasen crew who spot these suits are known to panic."
 	item = /obj/item/clothing/suit/space/hardsuit/syndi
 	cost = 8
-	exclude_modes = list(/datum/game_mode/nuclear) //you can't buy it in nuke, because the elite hardsuit costs the same while being better
+	exclude_modes = list(/datum/game_mode/nuclear, /datum/game_mode/nuclear/clown_ops) //you can't buy it in nuke, because the elite hardsuit costs the same while being better
 
 /datum/uplink_item/suits/hardsuit/elite
 	name = "Elite Syndicate Hardsuit"
@@ -78,3 +88,9 @@
 	cost = 30
 	include_modes = list(/datum/game_mode/nuclear, /datum/game_mode/nuclear/clown_ops)
 	exclude_modes = list()
+
+/datum/uplink_item/suits/thiefgloves
+	name = "Thieving Gloves"
+	desc = "A pair of gloves that are insulated and frictionless, allowing you to steal easily from anyone you see."
+	item = /obj/item/clothing/gloves/thief
+	cost = 4
