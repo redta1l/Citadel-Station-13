@@ -31,5 +31,5 @@ SUBSYSTEM_DEF(processing)
 			return
 
 /datum/proc/process()
-	set waitfor = 0
-	return PROCESS_KILL
+	. = PROCESS_KILL
+	CRASH("Base datum /process() called.")
