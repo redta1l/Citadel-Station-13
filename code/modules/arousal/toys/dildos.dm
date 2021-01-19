@@ -122,6 +122,8 @@ obj/item/dildo/flared/huge
 	name 				= "literal horse cock"
 	desc 				= "THIS THING IS HUGE!"
 	dildo_size 			= 4
+	force				= 10
+	hitsound = 'sound/weapons/klonk.ogg'
 
 obj/item/dildo/custom
 	name 				= "customizable dildo"

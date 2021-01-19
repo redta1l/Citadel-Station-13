@@ -87,24 +87,15 @@
 		if(user != src && (user.a_intent == INTENT_HELP || user.a_intent == INTENT_DISARM))
 			for(var/datum/surgery/S in surgeries)
 				if(S.next_step(user,user.a_intent))
-					return 1
+					return STOP_ATTACK_PROC_CHAIN
 
 	if(!all_wounds || !(user.a_intent == INTENT_HELP || user == src))
 		return ..()
 
-	// The following priority/nonpriority searching is so that if we have two wounds on a limb that use the same item for treatment (gauze can bandage cuts AND splint broken bones),
-	// we prefer whichever wound is not already treated (ignore the splinted broken bone for the open cut). If there's no priority wounds that this can treat, go through the
-	// non-priority ones randomly.
-	var/list/nonpriority_wounds = list()
-	for(var/datum/wound/W in shuffle(all_wounds))
-		if(!W.treat_priority)
-			nonpriority_wounds += W
-		else if(W.treat_priority && W.try_treating(I, user))
-			return 1
-
-	for(var/datum/wound/W in shuffle(nonpriority_wounds))
+	for(var/i in shuffle(all_wounds))
+		var/datum/wound/W = i
 		if(W.try_treating(I, user))
-			return 1
+			return STOP_ATTACK_PROC_CHAIN
 
 	return ..()
 
@@ -200,8 +191,8 @@
 			if(HAS_TRAIT(src, TRAIT_PACIFISM))
 				to_chat(src, "<span class='notice'>You gently let go of [throwable_mob].</span>")
 				return
-
-			adjustStaminaLossBuffered(STAM_COST_THROW_MOB * ((throwable_mob.mob_size+1)**2))// throwing an entire person shall be very tiring
+			if(!UseStaminaBuffer(STAM_COST_THROW_MOB * ((throwable_mob.mob_size+1)**2), TRUE))
+				return
 			var/turf/start_T = get_turf(loc) //Get the start and target tile for the descriptors
 			var/turf/end_T = get_turf(target)
 			if(start_T && end_T)
@@ -215,7 +206,8 @@
 			to_chat(src, "<span class='notice'>You set [I] down gently on the ground.</span>")
 			return
 
-		adjustStaminaLossBuffered(I.getweight(src, STAM_COST_THROW_MULT, SKILL_THROW_STAM_COST))
+		if(!UseStaminaBuffer(I.getweight(src, STAM_COST_THROW_MULT, SKILL_THROW_STAM_COST), warn = TRUE))
+			return
 
 	if(thrown_thing)
 		var/power_throw = 0
@@ -490,16 +482,17 @@
 			var/turf/target = get_turf(loc)
 			I.safe_throw_at(target,I.throw_range,I.throw_speed,src, force = move_force)
 
-/mob/living/carbon/Stat()
-	..()
-	if(statpanel("Status"))
-		var/obj/item/organ/alien/plasmavessel/vessel = getorgan(/obj/item/organ/alien/plasmavessel)
-		if(vessel)
-			stat(null, "Plasma Stored: [vessel.storedPlasma]/[vessel.max_plasma]")
-		if(locate(/obj/item/assembly/health) in src)
-			stat(null, "Health: [health]")
+/mob/living/carbon/get_status_tab_items()
+	. = ..()
+	var/obj/item/organ/alien/plasmavessel/vessel = getorgan(/obj/item/organ/alien/plasmavessel)
+	if(vessel)
+		. += "Plasma Stored: [vessel.storedPlasma]/[vessel.max_plasma]"
+	if(locate(/obj/item/assembly/health) in src)
+		. += "Health: [health]"
 
-	add_abilities_to_panel()
+/mob/living/carbon/get_proc_holders()
+	. = ..()
+	. += add_abilities_to_panel()
 
 /mob/living/carbon/attack_ui(slot)
 	if(!has_hand_for_held_index(active_hand_index))
@@ -602,14 +595,22 @@
 		remove_movespeed_modifier(/datum/movespeed_modifier/carbon_softcrit)
 
 /mob/living/carbon/update_stamina()
-	var/stam = getStaminaLoss()
-	if(stam > DAMAGE_PRECISION)
-		var/total_health = (maxHealth - stam)
-		if(total_health <= crit_threshold && !stat)
-			if(CHECK_MOBILITY(src, MOBILITY_STAND))
-				to_chat(src, "<span class='notice'>You're too exhausted to keep going...</span>")
-			KnockToFloor(TRUE)
-			update_health_hud()
+	var/total_health = getStaminaLoss()
+	if(total_health)
+		if(!(combat_flags & COMBAT_FLAG_HARD_STAMCRIT) && total_health >= STAMINA_CRIT && !stat)
+			to_chat(src, "<span class='notice'>You're too exhausted to keep going...</span>")
+			set_resting(TRUE, FALSE, FALSE)
+			SEND_SIGNAL(src, COMSIG_DISABLE_COMBAT_MODE)
+			ENABLE_BITFIELD(combat_flags, COMBAT_FLAG_HARD_STAMCRIT)
+			filters += CIT_FILTER_STAMINACRIT
+			update_mobility()
+	if((combat_flags & COMBAT_FLAG_HARD_STAMCRIT) && total_health <= STAMINA_CRIT_REMOVAL_THRESHOLD)
+		to_chat(src, "<span class='notice'>You don't feel nearly as exhausted anymore.</span>")
+		DISABLE_BITFIELD(combat_flags, COMBAT_FLAG_HARD_STAMCRIT)
+		filters -= CIT_FILTER_STAMINACRIT
+		update_mobility()
+	UpdateStaminaBuffer()
+	update_health_hud()
 
 /mob/living/carbon/update_sight()
 	if(!client)
@@ -838,6 +839,8 @@
 /mob/living/carbon/update_stat()
 	if(status_flags & GODMODE)
 		return
+	if(stat != CONSCIOUS)
+		clear_typing_indicator()
 	if(stat != DEAD)
 		if(health <= HEALTH_THRESHOLD_DEAD && !HAS_TRAIT(src, TRAIT_NODEATH))
 			death()
@@ -987,30 +990,15 @@
 			O.held_index = r_arm_index_next //2, 4, 6, 8...
 			hand_bodyparts += O
 
-/mob/living/carbon/do_after_coefficent()
-	. = ..()
-	var/datum/component/mood/mood = src.GetComponent(/datum/component/mood) //Currently, only carbons or higher use mood, move this once that changes.
-	if(mood)
-		switch(mood.sanity) //Alters do_after delay based on how sane you are
-			if(SANITY_INSANE to SANITY_DISTURBED)
-				. *= 1.25
-			if(SANITY_NEUTRAL to SANITY_GREAT)
-				. *= 0.90
-
-	for(var/i in status_effects)
-		var/datum/status_effect/S = i
-		. *= S.interact_speed_modifier()
-
-
 /mob/living/carbon/proc/create_internal_organs()
 	for(var/X in internal_organs)
 		var/obj/item/organ/I = X
 		I.Insert(src)
 
-/mob/living/carbon/proc/update_disabled_bodyparts()
+/mob/living/carbon/proc/update_disabled_bodyparts(silent = FALSE)
 	for(var/B in bodyparts)
 		var/obj/item/bodypart/BP = B
-		BP.update_disabled()
+		BP.update_disabled(silent)
 
 /mob/living/carbon/vv_get_dropdown()
 	. = ..()
@@ -1209,16 +1197,16 @@
 /**
   * generate_fake_scars()- for when you want to scar someone, but you don't want to hurt them first. These scars don't count for temporal scarring (hence, fake)
   *
-  * If you want a specific wound scar, pass that wound type as the second arg, otherwise you can pass a list like WOUND_LIST_CUT to generate a random cut scar.
+  * If you want a specific wound scar, pass that wound type as the second arg, otherwise you can pass a list like WOUND_LIST_SLASH to generate a random cut scar.
   *
   * Arguments:
   * * num_scars- A number for how many scars you want to add
-  * * forced_type- Which wound or category of wounds you want to choose from, WOUND_LIST_BONE, WOUND_LIST_CUT, or WOUND_LIST_BURN (or some combination). If passed a list, picks randomly from the listed wounds. Defaults to all 3 types
+  * * forced_type- Which wound or category of wounds you want to choose from, WOUND_LIST_BLUNT, WOUND_LIST_SLASH, or WOUND_LIST_BURN (or some combination). If passed a list, picks randomly from the listed wounds. Defaults to all 3 types
   */
 /mob/living/carbon/proc/generate_fake_scars(num_scars, forced_type)
 	for(var/i in 1 to num_scars)
-		var/datum/scar/S = new
-		var/obj/item/bodypart/BP = pick(bodyparts)
+		var/datum/scar/scaries = new
+		var/obj/item/bodypart/scar_part = pick(bodyparts)
 
 		var/wound_type
 		if(forced_type)
@@ -1227,9 +1215,17 @@
 			else
 				wound_type = forced_type
 		else
-			wound_type = pick(WOUND_LIST_BONE + WOUND_LIST_CUT + WOUND_LIST_BURN)
+			wound_type = pick(GLOB.global_all_wound_types)
 
-		var/datum/wound/W = new wound_type
-		S.generate(BP, W)
-		S.fake = TRUE
-		QDEL_NULL(W)
+		var/datum/wound/phantom_wound = new wound_type
+		scaries.generate(scar_part, phantom_wound)
+		scaries.fake = TRUE
+		QDEL_NULL(phantom_wound)
+
+/**
+  * get_biological_state is a helper used to see what kind of wounds we roll for. By default we just assume carbons (read:monkeys) are flesh and bone, but humans rely on their species datums
+  *
+  * go look at the species def for more info [/datum/species/proc/get_biological_state]
+  */
+/mob/living/carbon/proc/get_biological_state()
+	return BIO_FLESH_BONE

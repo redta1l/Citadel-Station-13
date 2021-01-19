@@ -10,6 +10,12 @@
 	value = REAGENT_VALUE_COMMON //Encouraging people to mix toxins for reasons beyond harming each other or mixing reagents such as pen acid.
 	var/toxpwr = 1.5
 
+// Are you a bad enough dude to poison your own plants?
+/datum/reagent/toxin/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustToxic(round(chems.get_reagent_amount(type) * 2))
+
 /datum/reagent/toxin/on_mob_life(mob/living/carbon/M)
 	if(toxpwr)
 		M.adjustToxLoss(toxpwr*REM, 0)
@@ -54,6 +60,11 @@
 	C.apply_effect(5,EFFECT_IRRADIATE,0)
 	return ..()
 
+/datum/reagent/toxin/mutagen/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	mytray.mutation_roll(user)
+	if(chems.has_reagent(type, 1))
+		mytray.adjustToxic(1.5) //It is still toxic, mind you, but not to the same degree.
+
 /datum/reagent/toxin/plasma
 	name = "Plasma"
 	description = "Plasma in its liquid form."
@@ -64,6 +75,7 @@
 	toxpwr = 3
 	pH = 4
 	value = REAGENT_VALUE_RARE //sheets are worth more
+	material = /datum/material/plasma
 
 /datum/reagent/toxin/plasma/on_mob_life(mob/living/carbon/C)
 	if(holder.has_reagent(/datum/reagent/medicine/epinephrine))
@@ -244,6 +256,13 @@
 	pH = 2.7
 	value = REAGENT_VALUE_NONE
 
+/datum/reagent/toxin/plantbgone/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustHealth(-round(chems.get_reagent_amount(type) * 10))
+		mytray.adjustToxic(round(chems.get_reagent_amount(type) * 6))
+		mytray.adjustWeeds(-rand(4,8))
+
 /datum/reagent/toxin/plantbgone/reaction_obj(obj/O, reac_volume)
 	if(istype(O, /obj/structure/alien/weeds))
 		var/obj/structure/alien/weeds/alien_weeds = O
@@ -269,6 +288,14 @@
 	pH = 3
 	value = REAGENT_VALUE_NONE
 
+//Weed Spray
+/datum/reagent/toxin/plantbgone/weedkiller/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	if(!mytray)
+		return
+	if(chems.has_reagent(type, 1))
+		mytray.adjustToxic(round(chems.get_reagent_amount(type) * 0.5))
+		mytray.adjustWeeds(-rand(1,2))
+
 /datum/reagent/toxin/pestkiller
 	name = "Pest Killer"
 	description = "A harmful toxic mixture to kill pests. Do not ingest!"
@@ -276,6 +303,14 @@
 	toxpwr = 1
 	pH = 3.2
 	value = REAGENT_VALUE_NONE
+
+//Pest Spray
+/datum/reagent/toxin/pestkiller/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	if(!mytray)
+		return
+	if(chems.has_reagent(type, 1))
+		mytray.adjustToxic(round(chems.get_reagent_amount(type) * 1))
+		mytray.adjustPests(-rand(1,2))
 
 /datum/reagent/toxin/pestkiller/reaction_mob(mob/living/M, method=TOUCH, reac_volume)
 	..()
@@ -372,6 +407,14 @@
 	toxpwr = 0.5
 	pH = 4.9
 	value = REAGENT_VALUE_VERY_COMMON
+
+/datum/reagent/toxin/teapowder/red
+	name = "Ground Red Tea Leaves"
+	toxpwr = 0.4
+
+/datum/reagent/toxin/teapowder/green
+	name = "Ground Green Tea Leaves"
+	toxpwr = 0.6
 
 /datum/reagent/toxin/mutetoxin //the new zombie powder.
 	name = "Mute Toxin"
@@ -829,6 +872,14 @@
 	pH = 2.75
 	value = REAGENT_VALUE_NONE
 
+// Sure, go ahead and pour acid on your precious plants. What's the worst that could happen?
+/datum/reagent/toxin/acid/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustHealth(-round(chems.get_reagent_amount(type) * 1))
+		mytray.adjustToxic(round(chems.get_reagent_amount(type) * 1.5))
+		mytray.adjustWeeds(-rand(1,2))
+
 /datum/reagent/toxin/acid/reaction_mob(mob/living/carbon/C, method=TOUCH, reac_volume)
 	if(!istype(C))
 		return
@@ -860,6 +911,14 @@
 	toxpwr = 2
 	acidpwr = 42.0
 	value = REAGENT_VALUE_COMMON
+
+// ACID II: UNHEEDED WARNINGS
+/datum/reagent/toxin/acid/fluacid/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustHealth(-round(chems.get_reagent_amount(type) * 2))
+		mytray.adjustToxic(round(chems.get_reagent_amount(type) * 3))
+		mytray.adjustWeeds(-rand(1,4))
 
 /datum/reagent/toxin/acid/fluacid/on_mob_life(mob/living/carbon/M)
 	M.adjustFireLoss(current_cycle/10, 0)

@@ -174,7 +174,14 @@
 		new reward(get_turf(src))
 		to_chat(user, "<span class='cultitalic'>You work the forge as dark knowledge guides your hands, creating the [choice]!</span>")
 
-
+/obj/structure/destructible/cult/forge/attackby(obj/item/I, mob/user)
+	if(!iscultist(user))
+		to_chat(user, "<span class='warning'>The heat radiating from [src] pushes you back.</span>")
+		return
+	if(istype(I, /obj/item/ingot))
+		var/obj/item/ingot/notsword = I
+		to_chat(user, "You heat the [notsword] in the [src].")
+		notsword.workability = "shapeable"
 
 /obj/structure/destructible/cult/pylon
 	name = "pylon"
@@ -207,8 +214,8 @@
 				if(L.health != L.maxHealth)
 					new /obj/effect/temp_visual/heal(get_turf(src), "#960000")
 					if(ishuman(L))
-						L.adjustBruteLoss(-1, 0)
-						L.adjustFireLoss(-1, 0)
+						L.adjustBruteLoss(-1, 0, only_organic = FALSE)
+						L.adjustFireLoss(-1, 0, only_organic = FALSE)
 						L.updatehealth()
 					if(isshade(L) || isconstruct(L))
 						var/mob/living/simple_animal/M = L

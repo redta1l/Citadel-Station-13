@@ -28,7 +28,6 @@
 		if(istype(owner.current.loc, /obj/structure/closet/crate/coffin))
 			Torpor_Begin()
 				// Wait before next pass
-	FreeAllVassals() 	// Free my Vassals! (if I haven't yet)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -121,9 +120,14 @@
 		if(bruteheal + fireheal + toxinheal > 0) 	// Just a check? Don't heal/spend, and return.
 			if(mult == 0)
 				return TRUE
+
 			// We have damage. Let's heal (one time)
-			C.adjustBruteLoss(-bruteheal * mult, forced = TRUE)// Heal BRUTE / BURN in random portions throughout the body.
-			C.adjustFireLoss(-fireheal * mult, forced = TRUE)
+			var/list/damaged_parts = C.get_damaged_bodyparts(TRUE,TRUE, status = list(BODYPART_ORGANIC, BODYPART_HYBRID, BODYPART_NANITES))
+			if(damaged_parts.len)
+				for(var/obj/item/bodypart/part in damaged_parts)	// Heal BRUTE / BURN equally distibuted over all damaged bodyparts.
+					part.heal_damage((bruteheal * mult)/damaged_parts.len, (fireheal * mult)/damaged_parts.len, only_organic = FALSE, updating_health = FALSE)
+				C.updatehealth()
+				C.update_damage_overlays()
 			C.adjustToxLoss(-toxinheal * mult * 2, forced = TRUE) //Toxin healing because vamps arent immune
 			//C.heal_overall_damage(bruteheal * mult, fireheal * mult)				 // REMOVED: We need to FORCE this, because otherwise, vamps won't heal EVER. Swapped to above.
 			AddBloodVolume((bruteheal * -0.5 + fireheal * -1 + toxinheal * -0.2) / mult * costMult)	// Costs blood to heal
@@ -270,13 +274,15 @@
 
 /datum/antagonist/bloodsucker/AmFinalDeath()
  	return owner && owner.AmFinalDeath()
-/datum/antagonist/changeling/AmFinalDeath()
- 	return owner && owner.AmFinalDeath()
 
 /datum/mind/proc/AmFinalDeath()
  	return !current || QDELETED(current) || !isliving(current) || isbrain(current) || !get_turf(current) // NOTE: "isliving()" is not the same as STAT == CONSCIOUS. This is to make sure you're not a BORG (aka silicon)
 
 /datum/antagonist/bloodsucker/proc/FinalDeath()
+		//Dont bother if we are already supposed to be dead
+	if(FinalDeath)
+		return
+	FinalDeath = TRUE //We are now supposed to die. Lets not spam it.
 	if(!iscarbon(owner.current)) //Check for non carbons.
 		owner.current.gib()
 		return
@@ -303,6 +309,7 @@
 			 "<span class='italics'>You hear a wet, bursting sound.</span>")
 		owner.current.gib(TRUE, FALSE, FALSE) //Brain cloning is wierd and allows hellbounds. Lets destroy the brain for safety.
 	playsound(owner.current, 'sound/effects/tendril_destroyed.ogg', 40, TRUE)
+
 
 
 

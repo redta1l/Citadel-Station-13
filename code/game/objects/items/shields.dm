@@ -106,8 +106,8 @@
 	var/disarming = (target_downed && (shield_flags & SHIELD_BASH_GROUND_SLAM_DISARM)) || (shield_flags & SHIELD_BASH_ALWAYS_DISARM) || (wallhit && (shield_flags & SHIELD_BASH_WALL_DISARM))
 	var/knockdown = !target_downed && ((shield_flags & SHIELD_BASH_ALWAYS_KNOCKDOWN) || (wallhit && (shield_flags & SHIELD_BASH_WALL_KNOCKDOWN)))
 	if(shieldbash_stagger_duration || knockdown)
-		target.visible_message("<span class='warning'>[target] is knocked [knockdown? "to the floor" : "off balanace"]!</span>",
-		"<span class='userdanger'>You are knocked [knockdown? "to the floor" : "off balanace"]!</span>")
+		target.visible_message("<span class='warning'>[target] is knocked [knockdown? "to the floor" : "off balance"]!</span>",
+		"<span class='userdanger'>You are knocked [knockdown? "to the floor" : "off balance"]!</span>")
 	if(knockdown)
 		target.KnockToFloor(disarming)
 	else if(disarming)
@@ -136,15 +136,17 @@
 		if(!(shield_flags & SHIELD_BASH_GROUND_SLAM))
 			to_chat(user, "<span class='warning'>You can't ground slam with [src]!</span>")
 			return FALSE
+		if(!user.UseStaminaBuffer(shieldbash_stamcost, warn = TRUE))
+			return FALSE
 		bash_target(user, target, NONE, harmful)
 		user.do_attack_animation(target, used_item = src)
 		playsound(src, harmful? "swing_hit" : 'sound/weapons/thudswoosh.ogg', 75, 1)
 		last_shieldbash = world.time
-		user.adjustStaminaLossBuffered(shieldbash_stamcost)
 		return TRUE
 	// Directional sweep!
 	last_shieldbash = world.time
-	user.adjustStaminaLossBuffered(shieldbash_stamcost)
+	if(!user.UseStaminaBuffer(shieldbash_stamcost, warn = TRUE))
+		return FALSE
 	// Since we are in combat mode, we can probably safely use the user's dir instead of getting their mouse pointing cardinal dir.
 	var/bashdir = user.dir
 	do_shieldbash_effect(user, bashdir, harmful)

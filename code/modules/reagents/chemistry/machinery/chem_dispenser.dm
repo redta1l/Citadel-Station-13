@@ -177,11 +177,10 @@
 		beaker = null
 		update_icon()
 
-/obj/machinery/chem_dispenser/ui_interact(mob/user, ui_key = "main", datum/tgui/ui = null, force_open = FALSE, \
-											datum/tgui/master_ui = null, datum/ui_state/state = GLOB.default_state)
-	ui = SStgui.try_update_ui(user, src, ui_key, ui, force_open)
+/obj/machinery/chem_dispenser/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
 	if(!ui)
-		ui = new(user, src, ui_key, "ChemDispenser", name, 565, 550, master_ui, state)
+		ui = new(user, src, "ChemDispenser", name)
 		if(user.hallucinating())
 			ui.set_autoupdate(FALSE) //to not ruin the immersion by constantly changing the fake chemicals
 		ui.open()
@@ -216,7 +215,7 @@
 		data["beakerTransferAmounts"] = null
 		data["beakerCurrentpH"] = null
 
-	var/list/chemicals = list()
+	var/chemicals[0]
 	var/is_hallucinating = FALSE
 	if(user.hallucinating())
 		is_hallucinating = TRUE
@@ -260,6 +259,7 @@
 						say("Not enough energy to complete operation!")
 						return
 					R.add_reagent(reagent, actual)
+					log_reagent("DISPENSER: ([COORD(src)]) ([REF(src)]) [key_name(usr)] dispensed [actual] of [reagent] to [beaker] ([REF(beaker)]).")
 
 					work_animation()
 			else
@@ -275,18 +275,21 @@
 				. = TRUE
 		if("eject")
 			replace_beaker(usr)
-			. = TRUE //no afterattack
+			. = TRUE
 		if("dispense_recipe")
 			if(!is_operational() || QDELETED(cell))
 				return
 			var/list/chemicals_to_dispense = saved_recipes[params["recipe"]]
 			if(!LAZYLEN(chemicals_to_dispense))
 				return
+			var/list/logstring = list()
+			var/earlyabort = FALSE
 			for(var/key in chemicals_to_dispense)
 				var/reagent = GLOB.name2reagent[translate_legacy_chem_id(key)]
 				var/dispense_amount = chemicals_to_dispense[key]
+				logstring += "[reagent] = [dispense_amount]"
 				if(!dispensable_reagents.Find(reagent))
-					return
+					break
 				if(!recording_recipe)
 					if(!beaker)
 						return
@@ -296,11 +299,15 @@
 					if(actual)
 						if(!cell.use(actual / powerefficiency))
 							say("Not enough energy to complete operation!")
-							return
+							earlyabort = TRUE
+							break
 						R.add_reagent(reagent, actual)
 						work_animation()
 				else
 					recording_recipe[key] += dispense_amount
+			logstring = logstring.Join(", ")
+			if(!recording_recipe)
+				log_reagent("DISPENSER: [key_name(usr)] dispensed recipe [params["recipe"]] with chemicals [logstring] to [beaker] ([REF(beaker)])[earlyabort? " (aborted early)":""]")
 			. = TRUE
 		if("clear_recipes")
 			if(!is_operational())
@@ -323,15 +330,19 @@
 			if(saved_recipes[name] && alert("\"[name]\" already exists, do you want to overwrite it?",, "Yes", "No") == "No")
 				return
 			if(name && recording_recipe)
+				var/list/logstring = list()
 				for(var/reagent in recording_recipe)
 					var/reagent_id = GLOB.name2reagent[translate_legacy_chem_id(reagent)]
+					logstring += "[reagent_id] = [recording_recipe[reagent]]"
 					if(!dispensable_reagents.Find(reagent_id))
-						visible_message("<span class='warning'>[src] buzzes.</span>", "<span class='italics'>You hear a faint buzz.</span>")
+						visible_message("<span class='warning'>[src] buzzes.</span>", "<span class='hear'>You hear a faint buzz.</span>")
 						to_chat(usr, "<span class ='danger'>[src] cannot find <b>[reagent]</b>!</span>")
-						playsound(src, 'sound/machines/buzz-two.ogg', 50, 1)
+						playsound(src, 'sound/machines/buzz-two.ogg', 50, TRUE)
 						return
 				saved_recipes[name] = recording_recipe
+				logstring = logstring.Join(", ")
 				recording_recipe = null
+				log_reagent("DISPENSER: [key_name(usr)] recorded recipe [name] with chemicals [logstring]")
 				. = TRUE
 		if("cancel_recording")
 			if(!is_operational())

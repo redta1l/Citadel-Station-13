@@ -28,8 +28,7 @@
 
 /obj/item/stack/medical/attack(mob/living/M, mob/user)
 	. = ..()
-	try_heal(M, user)
-
+	INVOKE_ASYNC(src, .proc/try_heal, M, user)
 
 /obj/item/stack/medical/proc/try_heal(mob/living/M, mob/user, silent = FALSE)
 	if(!M.can_inject(user, TRUE))
@@ -60,7 +59,7 @@
 	if(!affecting) //Missing limb?
 		to_chat(user, "<span class='warning'>[C] doesn't have \a [parse_zone(user.zone_selected)]!</span>")
 		return
-	if(affecting.status == BODYPART_ORGANIC) //Limb must be organic to be healed - RR
+	if(affecting.is_organic_limb(FALSE)) //Limb must be organic to be healed - RR
 		if(affecting.brute_dam && brute || affecting.burn_dam && burn)
 			user.visible_message("<span class='green'>[user] applies \the [src] on [C]'s [affecting.name].</span>", "<span class='green'>You apply \the [src] on [C]'s [affecting.name].</span>")
 			if(affecting.heal_damage(brute, burn))
@@ -116,27 +115,52 @@
 
 /obj/item/stack/medical/gauze
 	name = "medical gauze"
-	desc = "A roll of elastic cloth, perfect for stabilizing all kinds of wounds, from cuts and burns, to broken bones. "
+	desc = "A roll of elastic cloth, perfect for stabilizing all kinds of wounds, from cuts and burns to broken bones."
 	gender = PLURAL
 	singular_name = "medical gauze"
 	icon_state = "gauze"
 	heal_brute = 5
 	self_delay = 50
 	other_delay = 20
-	amount = 6
+	amount = 10
+	max_amount = 10
 	absorption_rate = 0.25
 	absorption_capacity = 5
 	splint_factor = 0.35
 	custom_price = PRICE_REALLY_CHEAP
+	grind_results = list(/datum/reagent/cellulose = 2)
 
 // gauze is only relevant for wounds, which are handled in the wounds themselves
 /obj/item/stack/medical/gauze/try_heal(mob/living/M, mob/user, silent)
 	var/obj/item/bodypart/limb = M.get_bodypart(check_zone(user.zone_selected))
-	if(limb)
-		if(limb.brute_dam > 40)
-			to_chat(user, "<span class='warning'>The bleeding on [user==M ? "your" : "[M]'s"] [limb.name] is from bruising, and cannot be treated with [src]!</span>")
-		else
-			to_chat(user, "<span class='warning'>There's no bleeding on [user==M ? "your" : "[M]'s"] [limb.name]</span>")
+	if(!limb)
+		to_chat(user, "<span class='notice'>There's nothing there to bandage!</span>")
+		return
+	if(!LAZYLEN(limb.wounds))
+		to_chat(user, "<span class='notice'>There's no wounds that require bandaging on [user==M ? "your" : "[M]'s"] [limb.name]!</span>") // good problem to have imo
+		return
+
+	var/gauzeable_wound = FALSE
+	for(var/i in limb.wounds)
+		var/datum/wound/woundies = i
+		if(woundies.wound_flags & ACCEPTS_GAUZE)
+			gauzeable_wound = TRUE
+			break
+	if(!gauzeable_wound)
+		to_chat(user, "<span class='notice'>There's no wounds that require bandaging on [user==M ? "your" : "[M]'s"] [limb.name]!</span>") // good problem to have imo
+		return
+
+	if(limb.current_gauze && (limb.current_gauze.absorption_capacity * 0.8 > absorption_capacity)) // ignore if our new wrap is < 20% better than the current one, so someone doesn't bandage it 5 times in a row
+		to_chat(user, "<span class='warning'>The bandage currently on [user==M ? "your" : "[M]'s"] [limb.name] is still in good condition!</span>")
+		return
+
+	user.visible_message("<span class='warning'>[user] begins wrapping the wounds on [M]'s [limb.name] with [src]...</span>", "<span class='warning'>You begin wrapping the wounds on [user == M ? "your" : "[M]'s"] [limb.name] with [src]...</span>")
+
+	if(!do_after(user, (user == M ? self_delay : other_delay), target=M))
+		return
+
+	user.visible_message("<span class='green'>[user] applies [src] to [M]'s [limb.name].</span>", "<span class='green'>You bandage the wounds on [user == M ? "yourself" : "[M]'s"] [limb.name].</span>")
+	limb.apply_gauze(src)
 
 /obj/item/stack/medical/gauze/attackby(obj/item/I, mob/user, params)
 	if(I.tool_behaviour == TOOL_WIRECUTTER || I.get_sharpness())
@@ -148,6 +172,14 @@
 					 "<span class='notice'>You cut [src] into pieces of cloth with [I].</span>", \
 					 "<span class='italics'>You hear cutting.</span>")
 		use(2)
+	else if(I.is_drainable() && I.reagents.has_reagent(/datum/reagent/space_cleaner/sterilizine))
+		if(!I.reagents.has_reagent(/datum/reagent/space_cleaner/sterilizine, 5))
+			to_chat(user, "<span class='warning'>There's not enough sterilizine in [I] to sterilize [src]!</span>")
+			return
+		user.visible_message("<span class='notice'>[user] sterilizes [src] with the contents of [I].</span>", "<span class='notice'>You pour the contents of [I] onto [src], sterilizing it.</span>")
+		I.reagents.remove_reagent(/datum/reagent/space_cleaner/sterilizine, 5)
+		new /obj/item/stack/medical/gauze/adv/one(user.drop_location())
+		use(1)
 	else
 		return ..()
 
@@ -155,11 +187,14 @@
 	user.visible_message("<span class='suicide'>[user] begins tightening \the [src] around [user.p_their()] neck! It looks like [user.p_they()] forgot how to use medical supplies!</span>")
 	return OXYLOSS
 
+/obj/item/stack/medical/gauze/one
+	amount = 1
+
 /obj/item/stack/medical/gauze/improvised
 	name = "improvised gauze"
 	singular_name = "improvised gauze"
 	heal_brute = 0
-	desc = "A roll of cloth roughly cut from something that does a decent job of stabilizing wounds, but less efficiently so than real medical gauze."
+	desc = "A roll of cloth roughly cut from something that does a decent job of stabilizing wounds, but less efficiently than real medical gauze."
 	self_delay = 60
 	other_delay = 30
 	absorption_rate = 0.15
@@ -167,9 +202,14 @@
 
 /obj/item/stack/medical/gauze/adv
 	name = "sterilized medical gauze"
-	desc = "A roll of elastic sterilized cloth that is extremely effective at stopping bleeding, heals minor wounds and cleans them."
 	singular_name = "sterilized medical gauze"
-	self_delay = 5
+	desc = "A roll of elastic sterilized cloth that is extremely effective at stopping bleeding and covering burns."
+	heal_brute = 6
+	self_delay = 45
+	other_delay = 15
+	absorption_rate = 0.5
+	absorption_capacity = 12
+	splint_factor = 0.15
 
 /obj/item/stack/medical/gauze/adv/one
 	amount = 1
@@ -187,8 +227,8 @@
 	icon_state = "suture"
 	self_delay = 30
 	other_delay = 10
-	amount = 10
-	max_amount = 10
+	amount = 15
+	max_amount = 15
 	repeating = TRUE
 	heal_brute = 10
 	stop_bleeding = 0.6
@@ -203,6 +243,9 @@
 
 /obj/item/stack/medical/suture/one
 	amount = 1
+
+/obj/item/stack/medical/suture/five
+	amount = 5
 
 /obj/item/stack/medical/suture/medicated
 	name = "medicated suture"
@@ -230,8 +273,8 @@
 			to_chat(user, "<span class='notice'>[M] is at full health.</span>")
 			return FALSE
 		user.visible_message("<span class='green'>[user] applies \the [src] on [M].</span>", "<span class='green'>You apply \the [src] on [M].</span>")
-		return heal_carbon(M, user, heal_brute, heal_burn)
-
+		M.heal_bodypart_damage(heal_brute)
+		return TRUE
 	to_chat(user, "<span class='warning'>You can't heal [M] with \the [src]!</span>")
 
 /obj/item/stack/medical/ointment
@@ -242,8 +285,8 @@
 	icon_state = "ointment"
 	lefthand_file = 'icons/mob/inhands/equipment/medical_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/equipment/medical_righthand.dmi'
-	amount = 10
-	max_amount = 10
+	amount = 12
+	max_amount = 12
 	self_delay = 40
 	other_delay = 20
 
@@ -273,8 +316,8 @@
 	self_delay = 30
 	other_delay = 10
 	amount = 15
-	heal_burn = 10
 	max_amount = 15
+	heal_burn = 10
 	repeating = TRUE
 	sanitization = 0.75
 	flesh_regeneration = 3
@@ -283,6 +326,9 @@
 
 /obj/item/stack/medical/mesh/one
 	amount = 1
+
+/obj/item/stack/medical/mesh/five
+	amount = 5
 
 /obj/item/stack/medical/mesh/advanced
 	name = "advanced regenerative mesh"
@@ -378,9 +424,9 @@
 			C.emote("scream")
 			for(var/i in C.bodyparts)
 				var/obj/item/bodypart/bone = i
-				var/datum/wound/brute/bone/severe/oof_ouch = new
+				var/datum/wound/blunt/severe/oof_ouch = new
 				oof_ouch.apply_wound(bone)
-				var/datum/wound/brute/bone/critical/oof_OUCH = new
+				var/datum/wound/blunt/critical/oof_OUCH = new
 				oof_OUCH.apply_wound(bone)
 
 			for(var/i in C.bodyparts)
@@ -430,3 +476,51 @@
 		return TRUE
 
 	to_chat(user, "<span class='warning'>You can't heal [M] with the \the [src]!</span>")
+
+/obj/item/stack/medical/nanogel
+	name = "nanogel"
+	singular_name = "nanogel"
+	desc = "A highly advanced gel that when applied on a sufficiently repaired robotic limb will neutralize internal damage if present, allowing further repairs without the need for surgery."
+	self_delay = 150	//Agonizingly slow if used on self, but, not completely forbidden because antags with robolimbs need a way to handle their thresholds.
+	other_delay = 30	//Pretty fast if used on others.
+	amount = 12
+	max_amount = 12	//Two synths worth of fixing, if every single bodypart of them has internal damage. Usually, probably more like 6-12.
+	icon_state = "nanogel"
+	var/being_applied = FALSE	//No doafter stacking.
+
+/obj/item/stack/medical/nanogel/try_heal(mob/living/M, mob/user, silent = FALSE)
+	if(being_applied)
+		to_chat(user, "<span class='warning'>You are already applying [src]!</span>")
+		return
+	if(!iscarbon(M))
+		to_chat(user, "<span class='warning'>This won't work on [M]!</span>")
+		return
+	being_applied = TRUE
+	..()
+	being_applied = FALSE
+
+/obj/item/stack/medical/nanogel/heal(mob/living/M, mob/user)
+	var/mob/living/carbon/C = M	//Only carbons should be able to get here
+	if(!C)
+		return
+	var/obj/item/bodypart/affecting = C.get_bodypart(check_zone(user.zone_selected))
+	if(!affecting) //Missing limb?
+		to_chat(user, "<span class='warning'>[C] doesn't have \a [parse_zone(user.zone_selected)]!</span>")
+		return
+	if(!affecting.is_robotic_limb())
+		to_chat(user, "<span class='warning'>This won't work on nonrobotic limbs!</span>")
+		return
+	if(!affecting.threshhold_brute_passed && !affecting.threshhold_burn_passed)
+		to_chat(user, "<span class='warning'>There is no need to use this on [affecting]</span>")
+		return
+	if(affecting.threshhold_brute_passed && affecting.brute_dam == affecting.threshhold_passed_mindamage)
+		. = TRUE
+		affecting.threshhold_brute_passed = FALSE
+	if(affecting.threshhold_burn_passed && affecting.burn_dam == affecting.threshhold_passed_mindamage)
+		. = TRUE
+		affecting.threshhold_burn_passed = FALSE
+	if(.)
+		user.visible_message("<span class='green'>The nanogel gets to work on [C], repairing [affecting]'s internal damage.</span>", "<span_class='green'>You watch as the nanogel gets to work on fixing the internal damage in [affecting]</span>")
+		return
+	//If it gets here: It failed, lets tell the user why.
+	to_chat(user, "<span class='warning'>[src] fails to work on [affecting] due to residual [(affecting.threshhold_burn_passed && affecting.threshhold_burn_passed) ? "brute and burn" : "[affecting.threshhold_burn_passed ? "burn" : "brute"]"] damage! Perform some external repairs before using this.</span>")

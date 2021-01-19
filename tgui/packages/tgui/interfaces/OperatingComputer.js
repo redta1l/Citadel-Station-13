@@ -25,7 +25,10 @@ const damageTypes = [
 export const OperatingComputer = (props, context) => {
   const [tab, setTab] = useSharedState(context, 'tab', 1);
   return (
-    <Window resizable>
+    <Window
+      width={350}
+      height={470}
+      resizable>
       <Window.Content scrollable>
         <Tabs>
           <Tabs.Tab
@@ -87,7 +90,7 @@ const PatientStateView = (props, context) => {
               </ProgressBar>
             </LabeledList.Item>
             {damageTypes.map(type => (
-              <LabeledList.Item key={type.type} label={type.label}>
+              <LabeledList.Item key={type.type} label={(patient.is_robotic_organism && type.label === 'Toxin') ? 'Corruption' : type.label}>
                 <ProgressBar
                   value={patient[type.type] / patient.maxHealth}
                   color="bad">

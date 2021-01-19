@@ -5,9 +5,9 @@
 	var/obj/item/clothing/head/hooded/hood
 	var/hoodtype = /obj/item/clothing/head/hooded/winterhood //so the chaplain hoodie or other hoodies can override this
 
-/obj/item/clothing/suit/hooded/New()
+/obj/item/clothing/suit/hooded/Initialize()
+	. = ..()
 	hood = MakeHelmet()
-	..()
 
 /obj/item/clothing/suit/hooded/Destroy()
 	. = ..()
@@ -48,7 +48,7 @@
 
 /obj/item/clothing/suit/hooded/update_icon_state()
 	icon_state = "[initial(icon_state)]"
-	if(ishuman(hood.loc))
+	if(ishuman(hood?.loc))
 		var/mob/living/carbon/human/H = hood.loc
 		if(H.head == hood)
 			icon_state += "_t"
@@ -58,6 +58,11 @@
 	RemoveHood()
 
 /obj/item/clothing/suit/hooded/proc/ToggleHood()
+	if(!hood)
+		to_chat(loc, "<span class='warning'>[src] seems to be missing its hood..</span>")
+		return
+	hood.atom_colours = atom_colours.Copy()
+	hood.update_atom_colour()
 	if(!suittoggled)
 		if(ishuman(src.loc))
 			var/mob/living/carbon/human/H = src.loc
@@ -131,8 +136,8 @@
 
 //Hardsuit toggle code
 /obj/item/clothing/suit/space/hardsuit/Initialize()
-	helmet = MakeHelmet()
 	. = ..()
+	helmet = MakeHelmet()
 
 /obj/item/clothing/suit/space/hardsuit/Destroy()
 	if(helmet)
@@ -191,7 +196,10 @@
 	if(!helmettype)
 		return
 	if(!helmet)
+		to_chat(H, "<span class='warning'>[src] seems to be missing its helmet..</span>")
 		return
+	helmet.atom_colours = atom_colours.Copy()
+	helmet.update_atom_colour()
 	if(!suittoggled)
 		if(ishuman(src.loc))
 			if(H.wear_suit != src)

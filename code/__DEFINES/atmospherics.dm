@@ -115,7 +115,7 @@
 #define MAX_HIGH_PRESSURE_DAMAGE			16		// CITADEL CHANGES Max to 16, low to 8.
 #define LOW_PRESSURE_DAMAGE					8		//The amount of damage someone takes when in a low pressure area (The pressure threshold is so low that it doesn't make sense to do any calculations, so it just applies this flat value).
 
-#define COLD_SLOWDOWN_FACTOR				20		//Humans are slowed by the difference between bodytemp and BODYTEMP_COLD_DAMAGE_LIMIT divided by this
+#define COLD_SLOWDOWN_FACTOR				35		//Humans are slowed by the difference between bodytemp and BODYTEMP_COLD_DAMAGE_LIMIT divided by this
 
 //PIPES
 //Atmos pipe limits
@@ -280,8 +280,6 @@ GLOBAL_LIST_INIT(atmos_adjacent_savings, list(0,0))
 #else
 #define CALCULATE_ADJACENT_TURFS(T) SSadjacent_air.queue[T] = 1
 #endif
-
-#define EXTOOLS (world.system_type == MS_WINDOWS ? "byond-extools.dll" : "libbyond-extools.so")
 
 GLOBAL_VAR(atmos_extools_initialized) // this must be an uninitialized (null) one or init_monstermos will be called twice because reasons
 #define ATMOS_EXTOOLS_CHECK if(!GLOB.atmos_extools_initialized){\

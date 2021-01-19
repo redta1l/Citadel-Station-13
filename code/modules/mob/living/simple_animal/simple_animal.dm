@@ -6,6 +6,7 @@
 	gender = PLURAL //placeholder
 	///How much blud it has for bloodsucking
 	blood_volume = 550
+	rad_flags = RAD_NO_CONTAMINATE
 
 	status_flags = CANPUSH
 
@@ -145,7 +146,9 @@
 	//How much bare wounding power it has
 	var/bare_wound_bonus = 0
 	//If the attacks from this are sharp
-	var/sharpness = FALSE
+	var/sharpness = SHARP_NONE
+	//Generic flags
+	var/simple_mob_flags = NONE
 
 /mob/living/simple_animal/Initialize()
 	. = ..()
@@ -343,11 +346,10 @@
 		remove_movespeed_modifier(/datum/movespeed_modifier/simplemob_varspeed)
 	add_or_update_variable_movespeed_modifier(/datum/movespeed_modifier/simplemob_varspeed, multiplicative_slowdown = speed)
 
-/mob/living/simple_animal/Stat()
-	..()
-	if(statpanel("Status"))
-		stat(null, "Health: [round((health / maxHealth) * 100)]%")
-		return 1
+/mob/living/simple_animal/get_status_tab_items()
+	. = ..()
+	. += ""
+	. += "Health: [round((health / maxHealth) * 100)]%"
 
 /mob/living/simple_animal/proc/drop_loot()
 	if(loot.len)

@@ -153,6 +153,9 @@
 /obj/mecha/get_cell()
 	return cell
 
+/obj/mecha/rust_heretic_act()
+	take_damage(500,  BRUTE)
+
 /obj/mecha/Destroy()
 	go_out()
 	var/mob/living/silicon/ai/AI
@@ -1004,7 +1007,7 @@
 
 	if(L && L.client)
 		L.update_mouse_pointer()
-		L.client.change_view(CONFIG_GET(string/default_view))
+		L.client.view_size.resetToDefault()
 		zoom_mode = 0
 
 /////////////////////////

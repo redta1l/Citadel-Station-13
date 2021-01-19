@@ -73,7 +73,7 @@
 				if(user.grab_state < GRAB_AGGRESSIVE)
 					to_chat(user, "<span class='warning'>You need a better grip to do that!</span>")
 					return
-				if(user.grab_state >= GRAB_NECK)
+				if(user.grab_state >= GRAB_NECK || HAS_TRAIT(user, TRAIT_MAULER))
 					tablelimbsmash(user, pushed_mob)
 				else
 					tablepush(user, pushed_mob)
@@ -147,7 +147,7 @@
 	pushed_mob.Knockdown(30)
 	var/obj/item/bodypart/banged_limb = pushed_mob.get_bodypart(user.zone_selected) || pushed_mob.get_bodypart(BODY_ZONE_HEAD)
 	var/extra_wound = 0
-	if(HAS_TRAIT(user, TRAIT_HULK))
+	if(HAS_TRAIT(user, TRAIT_HULK) || HAS_TRAIT(user, TRAIT_MAULER))
 		extra_wound = 20
 	banged_limb.receive_damage(30, wound_bonus = extra_wound)
 	pushed_mob.apply_damage(60, STAMINA)
@@ -597,7 +597,7 @@
 	icon = 'icons/obj/smooth_structures/brass_table.dmi'
 	icon_state = "brass_table"
 	resistance_flags = FIRE_PROOF | ACID_PROOF
-	buildstack = /obj/item/stack/tile/bronze
+	buildstack = /obj/item/stack/sheet/bronze
 	canSmoothWith = list(/obj/structure/table/reinforced/brass, /obj/structure/table/bronze)
 
 /obj/structure/table/bronze/tablelimbsmash(mob/living/user, mob/living/pushed_mob)

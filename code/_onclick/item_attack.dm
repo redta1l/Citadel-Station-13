@@ -67,9 +67,9 @@
 
 /**
   * Called when someone uses us to attack a mob in melee combat.
-  * 
+  *
   * This proc respects CheckAttackCooldown() default clickdelay handling.
-  * 
+  *
   * @params
   * * mob/living/M - target
   * * mob/living/user - attacker
@@ -85,6 +85,9 @@
 	if(force && damtype != STAMINA && HAS_TRAIT(user, TRAIT_PACIFISM))
 		to_chat(user, "<span class='warning'>You don't want to harm other living beings!</span>")
 		return
+	
+	if(!UseStaminaBufferStandard(user, STAM_COST_ATTACK_MOB_MULT, null, TRUE))
+		return DISCARD_LAST_ACTION
 
 	if(!force)
 		playsound(loc, 'sound/weapons/tap.ogg', get_clamped_volume(), 1, -1)
@@ -99,10 +102,6 @@
 
 	log_combat(user, M, "attacked", src.name, "(INTENT: [uppertext(user.a_intent)]) (DAMTYPE: [uppertext(damtype)])")
 	add_fingerprint(user)
-
-	var/weight = getweight(user, STAM_COST_ATTACK_MOB_MULT) //CIT CHANGE - makes attacking things cause stamina loss
-	if(weight)
-		user.adjustStaminaLossBuffered(weight)
 
 	// CIT SCREENSHAKE
 	if(force >= 15)
@@ -120,31 +119,21 @@
 	if(SEND_SIGNAL(src, COMSIG_ITEM_ATTACK_OBJ, O, user) & COMPONENT_NO_ATTACK_OBJ)
 		return
 	if(item_flags & NOBLUDGEON)
-		return
+		return DISCARD_LAST_ACTION
+	if(!UseStaminaBufferStandard(user, STAM_COST_ATTACK_OBJ_MULT, warn = TRUE))
+		return DISCARD_LAST_ACTION
 	user.do_attack_animation(O)
 	O.attacked_by(src, user)
-	var/weight = getweight(user, STAM_COST_ATTACK_OBJ_MULT)
-	if(weight)
-		user.adjustStaminaLossBuffered(weight)//CIT CHANGE - makes attacking things cause stamina loss
 
 /atom/movable/proc/attacked_by()
 	return
 
 /obj/attacked_by(obj/item/I, mob/living/user, attackchain_flags = NONE, damage_multiplier = 1)
 	var/totitemdamage = I.force * damage_multiplier
-	var/bad_trait
-
-	var/stamloss = user.getStaminaLoss()
-	if(stamloss > STAMINA_NEAR_SOFTCRIT) //The more tired you are, the less damage you do.
-		var/penalty = (stamloss - STAMINA_NEAR_SOFTCRIT)/(STAMINA_NEAR_CRIT - STAMINA_NEAR_SOFTCRIT)*STAM_CRIT_ITEM_ATTACK_PENALTY
-		totitemdamage *= 1 - penalty
-
-	if(SEND_SIGNAL(user, COMSIG_COMBAT_MODE_CHECK, COMBAT_MODE_INACTIVE))
-		bad_trait = SKILL_COMBAT_MODE //blacklist combat skills.
 
 	if(I.used_skills && user.mind)
 		if(totitemdamage)
-			totitemdamage = user.mind.item_action_skills_mod(I, totitemdamage, I.skill_difficulty, SKILL_ATTACK_OBJ, bad_trait)
+			totitemdamage = user.mind.item_action_skills_mod(I, totitemdamage, I.skill_difficulty, SKILL_ATTACK_OBJ)
 		for(var/skill in I.used_skills)
 			if(!(SKILL_TRAIN_ATTACK_OBJ in I.used_skills[skill]))
 				continue
@@ -187,28 +176,15 @@
 	if(!.)
 		return
 
-	var/stamloss = user.getStaminaLoss()
 	var/stam_mobility_mult = 1
-	if(stamloss > STAMINA_NEAR_SOFTCRIT) //The more tired you are, the less damage you do.
-		var/penalty = (stamloss - STAMINA_NEAR_SOFTCRIT)/(STAMINA_NEAR_CRIT - STAMINA_NEAR_SOFTCRIT)*STAM_CRIT_ITEM_ATTACK_PENALTY
-		stam_mobility_mult -= penalty
 	if(stam_mobility_mult > LYING_DAMAGE_PENALTY && !CHECK_MOBILITY(user, MOBILITY_STAND)) //damage penalty for fighting prone, doesn't stack with the above.
 		stam_mobility_mult = LYING_DAMAGE_PENALTY
 	. *= stam_mobility_mult
 
-	var/bad_trait
-	if(!(I.item_flags & NO_COMBAT_MODE_FORCE_MODIFIER))
-		if(SEND_SIGNAL(user, COMSIG_COMBAT_MODE_CHECK, COMBAT_MODE_INACTIVE))
-			bad_trait = SKILL_COMBAT_MODE //blacklist combat skills.
-			if(SEND_SIGNAL(src, COMSIG_COMBAT_MODE_CHECK, COMBAT_MODE_ACTIVE))
-				. *= 0.5
-		else if(SEND_SIGNAL(src, COMSIG_COMBAT_MODE_CHECK, COMBAT_MODE_INACTIVE))
-			. *= 1.5
-
 	if(!user.mind || !I.used_skills)
 		return
 	if(.)
-		. = user.mind.item_action_skills_mod(I, ., I.skill_difficulty, SKILL_ATTACK_MOB, bad_trait)
+		. = user.mind.item_action_skills_mod(I, ., I.skill_difficulty, SKILL_ATTACK_MOB)
 	for(var/skill in I.used_skills)
 		if(!(SKILL_TRAIN_ATTACK_MOB in I.used_skills[skill]))
 			continue
@@ -220,7 +196,7 @@
   * Also called when clicking on something with an item without being in melee range
   *
   * WARNING: This does not automatically check clickdelay if not in a melee attack! Be sure to account for this!
-  * 
+  *
   * @params
   * * target - The thing we clicked
   * * user - mob of person clicking
@@ -238,25 +214,24 @@
 		else
 			return clamp(w_class * 6, 10, 100) // Multiply the item's weight class by 6, then clamp the value between 10 and 100
 
-/mob/living/proc/send_item_attack_message(obj/item/I, mob/living/user, hit_area, current_force)
+/mob/living/proc/send_item_attack_message(obj/item/I, mob/living/user, hit_area, obj/item/bodypart/hit_bodypart)
 	var/message_verb = "attacked"
-	if(I.attack_verb && I.attack_verb.len)
+	if(length(I.attack_verb))
 		message_verb = "[pick(I.attack_verb)]"
-	if(current_force < I.force * FEEBLE_ATTACK_MSG_THRESHOLD)
-		message_verb = "[pick("feebly", "limply", "saplessly")] [message_verb]"
 	else if(!I.force)
 		return
 	var/message_hit_area = ""
 	if(hit_area)
 		message_hit_area = " in the [hit_area]"
-	var/attack_message = "[src] has been [message_verb][message_hit_area] with [I]."
+	var/attack_message = "[src] is [message_verb][message_hit_area] with [I]!"
+	var/attack_message_local = "You're [message_verb][message_hit_area] with [I]!"
 	if(user in viewers(src, null))
-		attack_message = "[user] has [message_verb] [src][message_hit_area] with [I]!"
+		attack_message = "[user] [message_verb] [src][message_hit_area] with [I]!"
+		attack_message_local = "[user] [message_verb] you[message_hit_area] with [I]!"
+	if(user == src)
+		attack_message_local = "You [message_verb] yourself[message_hit_area] with [I]"
 	visible_message("<span class='danger'>[attack_message]</span>",\
-		"<span class='userdanger'>[attack_message]</span>", null, COMBAT_MESSAGE_RANGE)
-	if(hit_area == BODY_ZONE_HEAD)
-		if(prob(2))
-			playsound(src, 'sound/weapons/dink.ogg', 30, 1)
+		"<span class='userdanger'>[attack_message_local]</span>", null, COMBAT_MESSAGE_RANGE)
 	return 1
 
 /// How much stamina this takes to swing this is not for realism purposes hecc off.
@@ -264,21 +239,23 @@
 	. = (total_mass || w_class * STAM_COST_W_CLASS_MULT) * multiplier
 	if(!user)
 		return
-	var/bad_trait
-	if(SEND_SIGNAL(user, COMSIG_COMBAT_MODE_CHECK, COMBAT_MODE_INACTIVE))
-		. *= STAM_COST_NO_COMBAT_MULT
-		bad_trait = SKILL_COMBAT_MODE
 	if(used_skills && user.mind)
-		. = user.mind.item_action_skills_mod(src, ., skill_difficulty, trait, bad_trait, FALSE)
-	var/total_health = user.getStaminaLoss()
-	. = clamp(., 0, STAMINA_NEAR_CRIT - total_health)
+		. = user.mind.item_action_skills_mod(src, ., skill_difficulty, trait, null, FALSE)
+
+/**
+  * Uses the amount of stamina required for a standard hit
+  */
+/obj/item/proc/UseStaminaBufferStandard(mob/living/user, multiplier = 1, trait = SKILL_STAMINA_COST, warn = TRUE)
+	ASSERT(user)
+	var/cost = getweight(user, multiplier, trait)
+	return user.UseStaminaBuffer(cost, warn)
 
 /// How long this staggers for. 0 and negatives supported.
 /obj/item/proc/melee_stagger_duration(force_override)
 	if(!isnull(stagger_force))
 		return stagger_force
 	/// totally not an untested, arbitrary equation.
-	return clamp((1.5 + (w_class/7.5)) * ((force_override || force) / 2), 0, 10 SECONDS)
+	return clamp((1.5 + (w_class/5)) * ((force_override || force) / 1.5), 0, 10 SECONDS)
 
 /obj/item/proc/do_stagger_action(mob/living/target, mob/living/user, force_override)
 	if(!CHECK_BITFIELD(target.status_flags, CANSTAGGER))
